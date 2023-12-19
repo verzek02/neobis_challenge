@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from neobis_challenge.models import Category, Product
+from neobis_challenge.models import Category, Product, Order
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -19,3 +19,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'

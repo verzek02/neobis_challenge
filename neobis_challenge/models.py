@@ -28,3 +28,10 @@ class Order(models.Model):
 
     def __str__(self):
         return self.name
+
+    def total_price(self):
+        product_price = self.product.price if self.product else 0
+        return self.quantity * product_price
+
+
+
