@@ -1,8 +1,4 @@
-from django.shortcuts import render
 from rest_framework import viewsets, mixins
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, RetrieveAPIView
-from rest_framework.mixins import RetrieveModelMixin
-from rest_framework.response import Response
 
 from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer, OrderSerializer
 from .models import Category, Product, Order

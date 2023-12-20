@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'neobis_challenge',
     'rest_framework',
+    'drf_yasg',
 
 ]
 
