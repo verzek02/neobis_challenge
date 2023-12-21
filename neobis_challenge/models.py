@@ -1,5 +1,5 @@
 import string
-from random import random
+import random
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -26,6 +26,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
+        verbose_name = 'Product'
         verbose_name_plural = 'Products'
 
     def __str__(self):
@@ -36,9 +37,10 @@ class Order(models.Model):
     name = models.CharField(max_length=30)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    order_number = models.CharField(max_length=10, blank=True, unique=True, null=True)
+    order_number = models.CharField(max_length=10, blank=True, unique=True, null=True, editable=False)
 
     class Meta:
+        verbose_name = 'Order'
         verbose_name_plural = 'Orders'
 
     def __str__(self):
@@ -49,3 +51,12 @@ class Order(models.Model):
         return self.quantity * product_price
 
 
+def generate_order_number():
+    return ''.join(random.choice(string.digits) for _ in range(5))
+
+
+# Сигнал, реагирующий на создание объекта
+@receiver(pre_save, sender=Order)
+def generate_order_number_on_create(sender, instance, **kwargs):
+    if not instance.order_number:
+        instance.order_number = generate_order_number()

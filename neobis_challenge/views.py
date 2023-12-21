@@ -1,24 +1,27 @@
-from rest_framework import viewsets, mixins
-
+from django.http import HttpResponseRedirect
+from rest_framework import generics, viewsets
 from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer, OrderSerializer
 from .models import Category, Product, Order
 
 
-class CategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
-class ProductDetailView(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+
+
