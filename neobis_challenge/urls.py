@@ -1,10 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from .serializers import OrderDetailSerializer
 from .views import (
     CategoryListView,
     ProductListView, ProductDetailView,
-    OrderViewSet,
+    OrderViewSet, OrderDetailView,
 )
 
 
@@ -15,5 +16,5 @@ urlpatterns = [
     path('products/', ProductListView.as_view(), name='product-list-create'),
     path('products/detail/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
     path('order/', OrderViewSet.as_view(), name='product-list-create'),
-    # path('add/<int:product_id>/', basket_add, )
+    path('order/detail/<int:pk>/', OrderDetailView.as_view(), name='order-detail')
 ]

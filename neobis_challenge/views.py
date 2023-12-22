@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
 from rest_framework import generics, viewsets
-from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer, OrderSerializer
+from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer, OrderSerializer, \
+    OrderDetailSerializer
 from .models import Category, Product, Order
 
 
@@ -24,4 +25,6 @@ class OrderViewSet(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
 
 
-
+class OrderDetailView(generics.RetrieveAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
