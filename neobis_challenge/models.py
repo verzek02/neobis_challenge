@@ -1,6 +1,6 @@
 import string
 import random
-
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -33,22 +33,23 @@ class Product(models.Model):
         return self.title
 
 
-class Order(models.Model):
-    name = models.CharField(max_length=30)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-    order_number = models.CharField(max_length=10, blank=True, unique=True, null=True, editable=False)
-
-    class Meta:
-        verbose_name = 'Order'
-        verbose_name_plural = 'Orders'
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_quantity = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return self.name
+        return f"Cart for {self.user.username}"
 
-    def total_price(self):
-        product_price = self.product.price if self.product else 0
-        return self.quantity * product_price
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    order_number = models.CharField(max_length=5, blank=True, unique=True, null=True, editable=False)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.title} in cart"
 
 
 def generate_order_number():
@@ -56,7 +57,7 @@ def generate_order_number():
 
 
 # Сигнал, реагирующий на создание объекта
-@receiver(pre_save, sender=Order)
+@receiver(pre_save, sender=CartItem)
 def generate_order_number_on_create(sender, instance, **kwargs):
     if not instance.order_number:
         instance.order_number = generate_order_number()
