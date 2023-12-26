@@ -1,16 +1,18 @@
 from rest_framework import serializers
-# from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
-
 from users.models import CustomUser
 
 
-class UserValidateSerializer(serializers.Serializer):
-    model = CustomUser
+class UserValidateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'password']
 
 
-class UserCreateSerializer(serializers.Serializer):
-    model = CustomUser
+class UserCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'password']
 
     def validate_username(self, username):
         try:
