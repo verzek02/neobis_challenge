@@ -1,12 +1,9 @@
+# serializers.py
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+
+from django.contrib.auth import authenticate
+
 from users.models import CustomUser
-
-
-class UserValidateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'password']
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -14,9 +11,22 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username', 'password']
 
-    def validate_username(self, username):
-        try:
-            CustomUser.objects.get(username=username)
-            raise ValidationError("This username is already taken.")
-        except CustomUser.DoesNotExist:
-            return username
+
+class AuthSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+
+            if user:
+                data['user'] = user
+                return data
+            else:
+                raise serializers.ValidationError('Unable to log in with provided credentials.')
+        else:
+            raise serializers.ValidationError('Must include "username" and "password".')

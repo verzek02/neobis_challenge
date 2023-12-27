@@ -1,11 +1,11 @@
+import random
+import uuid
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users.models import CustomUser
-
-
-# from users.models import CustomUser
 
 
 class Category(models.Model):
@@ -21,10 +21,10 @@ class Category(models.Model):
 
 class Product(models.Model):
     title = models.CharField(max_length=100, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
     image = models.ImageField(upload_to='product')
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
@@ -37,8 +37,8 @@ class Product(models.Model):
 
 class Cart(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    total_quantity = models.PositiveIntegerField(default=0)
+    total_price = models.DecimalField(max_digits=10, null=True, decimal_places=2, editable=False)
+    total_quantity = models.PositiveIntegerField(default=0, editable=False)
 
     def __str__(self):
         return f"Cart for {self.user.username}"
@@ -54,22 +54,21 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    order_number = models.CharField(max_length=10, unique=True, editable=False)
+    cart_item = models.ForeignKey(CartItem, on_delete=models.CASCADE)
+    order_number = models.CharField(max_length=6, editable=False, unique=True)
     phone_number = models.CharField(max_length=15)
     address = models.CharField(max_length=255)
     landmark = models.CharField(max_length=255)
     comment = models.TextField(blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        random_number = [random.randint(0, 9) for _ in range(6)]
+
+        self.order_number = random_number
+
+        super().save(*args, **kwargs)
+
+        return self.order_number
+
     def __str__(self):
-        return f"Order {self.order_number}"
-
-
-@receiver(post_save, sender=CartItem)
-def create_order_item(sender, instance, created, **kwargs):
-    if created:
-        order = instance.cart.order
-        order.phone_number = instance.cart.user.phone_number
-        order.address = instance.cart.user.address
-        order.landmark = instance.cart.user.landmark
-        order.save()
+        return self.address
