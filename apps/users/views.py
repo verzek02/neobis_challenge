@@ -1,9 +1,8 @@
-# views.py
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -32,24 +31,20 @@ class TokenLoginAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Получаем токен из запроса (если предоставлен в заголовке Authorization)
         client_token_key = request.headers.get('Authorization', '').split(' ')[-1]
 
         if not client_token_key:
             return Response(data={'message': 'Token not provided.'}, status=400)
 
         try:
-            # Получаем текущий токен пользователя
             user = request.user
             current_token = Token.objects.get(user=user)
 
-            # Сравниваем токены
             if client_token_key == current_token.key:
                 message = 'You are authenticated with a token!'
             else:
                 message = 'Token mismatch. Access denied.'
 
-            # Используем сериализатор для возврата данных
             serializer = TokenLoginSerializer({'message': message})
             return Response(serializer.data)
         except Token.DoesNotExist:

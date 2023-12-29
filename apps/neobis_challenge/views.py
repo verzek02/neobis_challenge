@@ -1,10 +1,10 @@
 import string
 from random import choice
 
-from rest_framework import generics, status, request
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 
+from rest_framework.response import Response
 from .models import Category, Product, Order, Cart, CartItem
 from .serializers import (CategorySerializer,
                           ProductSerializer,
@@ -47,7 +47,6 @@ class CartDetail(generics.RetrieveAPIView):
         serializer = self.get_serializer(cart)
         cart_data = serializer.data
 
-        # Включаем информацию о товарах внутри корзины
         cart_data['products'] = CartItemSerializer(cart.cartitem_set.all(), many=True).data
 
         return Response(cart_data)
@@ -68,23 +67,18 @@ class AddToCart(generics.UpdateAPIView):
         user = request.user
         cart, created = CartItem.objects.get_or_create(user=user)
 
-        # Проверяем, есть ли товар уже в корзине
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
 
-        # Если товар уже в корзине, увеличиваем количество
         if not created:
             cart_item.quantity += 1
             cart_item.save()
         else:
-            # Если товар только что добавлен, обновляем общую стоимость и количество
             cart.total_price += product.price
             cart.total_quantity += 1
             cart.save()
 
-        # Получаем данные о корзине
         serializer = self.get_serializer(cart)
 
-        # Дополняем данные о корзине общей стоимостью и количеством
         cart_data = serializer.data
         cart_data['total_price'] = float(cart.total_price)  # Преобразуем Decimal в float
         cart_data['total_quantity'] = cart.total_quantity
